@@ -4,3 +4,4 @@ String prefRefreshTokenKey = 'refresh_token';
 
 const String defaultAvatarUrl = 'https://feji.us/a593ri';
 
+const String diaryTableName = 'Diary';

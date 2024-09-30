@@ -27,7 +27,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   void _startTimer() {
     _timer = Timer(const Duration(seconds: 3, milliseconds: 725), () {
-      Navigator.pushReplacementNamed(context, '/auth-gate');
+      Navigator.pushReplacementNamed(context, '/diary');
     });
   }
 

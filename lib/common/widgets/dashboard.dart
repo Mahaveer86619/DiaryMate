@@ -1,5 +1,7 @@
 import 'package:diary_mate/common/widgets/bottom_app_bar/bloc/navigation_bloc.dart';
 import 'package:diary_mate/common/widgets/bottom_app_bar/widgets/my_bottom_app_bar.dart';
+import 'package:diary_mate/features/diary/presentation/screens/diary_screen.dart';
+import 'package:diary_mate/features/movie_recomendation/presentation/screens/movie_recomendation_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -12,8 +14,8 @@ class Dashboard extends StatefulWidget {
 
 class _DashboardState extends State<Dashboard> {
   final List<Widget> pages = [
-    const Placeholder(), // Diary
-    const Placeholder(), // Movie Recommendations
+    const DiaryScreen(),
+    const MovieRecomendationScreen(),
   ];
 
   BottomNavigationBarItem _createBottomNavItem({
@@ -51,32 +53,18 @@ class _DashboardState extends State<Dashboard> {
 
             final List<BottomNavigationBarItem> bottomNavItems = [
               _createBottomNavItem(
-                inactiveIcon: Icons.home_outlined,
-                activeIcon: Icons.home,
+                inactiveIcon: Icons.book_outlined,
+                activeIcon: Icons.book,
                 isActive: currentIndex == 0,
                 context: context,
-                label: 'Home',
+                label: 'Diary',
               ),
               _createBottomNavItem(
-                inactiveIcon: Icons.list_outlined,
-                activeIcon: Icons.list,
+                inactiveIcon: Icons.subtitles_outlined,
+                activeIcon: Icons.subtitles,
                 isActive: currentIndex == 1,
                 context: context,
-                label: 'Assignments',
-              ),
-              _createBottomNavItem(
-                inactiveIcon: Icons.chat_outlined,
-                activeIcon: Icons.chat,
-                isActive: currentIndex == 2,
-                context: context,
-                label: 'Chat',
-              ),
-              _createBottomNavItem(
-                inactiveIcon: Icons.person_outlined,
-                activeIcon: Icons.person,
-                isActive: currentIndex == 3,
-                context: context,
-                label: 'Profile',
+                label: 'Movie',
               ),
             ];
 

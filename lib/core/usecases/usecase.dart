@@ -1,3 +1,3 @@
-abstract class UseCase<Type, Params> {
+abstract class Usecase<Type, Params> {
   Future<Type> execute({required Params params});
 }

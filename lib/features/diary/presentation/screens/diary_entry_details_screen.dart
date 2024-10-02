@@ -1,23 +1,28 @@
 import 'package:diary_mate/common/widgets/text_field.dart';
+import 'package:diary_mate/core/themes/pallet.dart';
 import 'package:diary_mate/features/diary/domain/entities/diary_entity.dart';
 import 'package:diary_mate/features/diary/presentation/bloc/diary_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:uuid/v1.dart';
 
-class AddDiaryEntryScreen extends StatefulWidget {
-  const AddDiaryEntryScreen({super.key});
+class DiaryEntryDetailsScreen extends StatefulWidget {
+  const DiaryEntryDetailsScreen({super.key});
 
   @override
-  State<AddDiaryEntryScreen> createState() => _AddDiaryEntryScreenState();
+  State<DiaryEntryDetailsScreen> createState() =>
+      _DiaryEntryDetailsScreenState();
 }
 
-class _AddDiaryEntryScreenState extends State<AddDiaryEntryScreen> {
+class _DiaryEntryDetailsScreenState extends State<DiaryEntryDetailsScreen> {
   final _formKey = GlobalKey<FormState>();
-  var uuid = const UuidV1();
 
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
+
+  var titleText = 'Details';
+  var isEditing = false;
+
+  late DiaryEntity diaryEntry;
 
   void _changeScreen(
     String routeName, {
@@ -50,10 +55,14 @@ class _AddDiaryEntryScreenState extends State<AddDiaryEntryScreen> {
       context.read<DiaryBloc>().add(
             DiarySaveEntry(
               DiaryEntity(
-                id: uuid.generate(),
-                entryTitle: _titleController.text.trim(),
-                entryContent: _contentController.text.trim(),
-                date: DateTime.now().toIso8601String(),
+                id: diaryEntry.id,
+                entryTitle: _titleController.text.trim() == ''
+                    ? diaryEntry.entryTitle
+                    : _titleController.text.trim(),
+                entryContent: _contentController.text.trim() == ''
+                    ? diaryEntry.entryContent
+                    : _contentController.text.trim(),
+                date: diaryEntry.date,
               ),
             ),
           );
@@ -75,13 +84,18 @@ class _AddDiaryEntryScreenState extends State<AddDiaryEntryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final arguments =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
+
+    diaryEntry = arguments['diaryEntry'] as DiaryEntity;
+
     return SafeArea(
       child: BlocConsumer<DiaryBloc, DiaryState>(
         listener: (context, state) {
           if (state is DiaryError) {
             _showMessage(state.error);
           } else if (state is DiaryLoaded) {
-            _showMessage('Diary entry added!');
+            _showMessage('Diary entry edited!');
             Navigator.pop(context);
           }
         },
@@ -97,7 +111,7 @@ class _AddDiaryEntryScreenState extends State<AddDiaryEntryScreen> {
           }
           return Scaffold(
             appBar: _buildAppBar(),
-            body: _buildBody(context),
+            body: _buildBody(context, diaryEntry),
             floatingActionButton: _buildFAB(),
           );
         },
@@ -110,25 +124,79 @@ class _AddDiaryEntryScreenState extends State<AddDiaryEntryScreen> {
       backgroundColor: Theme.of(context).colorScheme.background,
       automaticallyImplyLeading: true,
       title: Text(
-        'Add diary entry',
+        titleText,
         style: Theme.of(context).textTheme.titleLarge!.copyWith(
               color: Theme.of(context).colorScheme.onSurface,
             ),
       ),
+      actions: [
+        GestureDetector(
+          onTap: () {
+            _changeScreen('/movie_recommends', arguments: {
+              'diaryEntryContent': _contentController.text.trim() == ''
+                  ? diaryEntry.entryContent
+                  : _contentController.text.trim(),
+            });
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(32),
+              border: Border.all(
+                color: Pallete.borderColor,
+                width: 1,
+              ),
+              gradient: const LinearGradient(
+                colors: [
+                  Pallete.gradient1,
+                  Pallete.gradient2,
+                  Pallete.gradient3,
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.subtitles,
+                  color: Theme.of(context).colorScheme.onBackground,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Movie',
+                  style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                        color: Theme.of(context).colorScheme.onBackground,
+                      ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+      ],
     );
   }
 
   _buildFAB() {
     return FloatingActionButton(
       onPressed: () {
-        _onSaveDiaryEntry();
+        if (isEditing) {
+          _onSaveDiaryEntry();
+        } else {
+          setState(() {
+            isEditing = true;
+          });
+        }
       },
       backgroundColor: Theme.of(context).colorScheme.primary,
-      child: const Icon(Icons.save),
+      child: isEditing ? const Icon(Icons.save) : const Icon(Icons.edit),
     );
   }
 
-  _buildBody(BuildContext context) {
+  _buildBody(BuildContext context, DiaryEntity diaryEntry) {
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       child: Column(
@@ -139,14 +207,14 @@ class _AddDiaryEntryScreenState extends State<AddDiaryEntryScreen> {
           // Form
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: _buildForm(),
+            child: _buildForm(diaryEntry),
           ),
         ],
       ),
     );
   }
 
-  _buildForm() {
+  _buildForm(DiaryEntity diaryEntry) {
     return Form(
       key: _formKey,
       child: Column(
@@ -158,6 +226,8 @@ class _AddDiaryEntryScreenState extends State<AddDiaryEntryScreen> {
             keyboardType: TextInputType.text,
             label: 'Entry title',
             keyboardAction: TextInputAction.next,
+            initialText: diaryEntry.entryTitle,
+            disableInput: !isEditing,
             validator: (value) {
               if (value!.isEmpty) {
                 return 'Title is required';
@@ -174,6 +244,8 @@ class _AddDiaryEntryScreenState extends State<AddDiaryEntryScreen> {
           MyBigTextField(
             hintText: 'Entry content',
             controller: _contentController,
+            initialValue: diaryEntry.entryContent,
+            disableInput: !isEditing,
             lines: 20,
             validator: (value) {
               if (value!.isEmpty) {

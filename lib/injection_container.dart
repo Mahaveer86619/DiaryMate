@@ -6,6 +6,11 @@ import 'package:diary_mate/features/diary/domain/usecases/get_all_entries_usecas
 import 'package:diary_mate/features/diary/domain/usecases/remove_diary_entry.dart';
 import 'package:diary_mate/features/diary/domain/usecases/save_diary_entry.dart';
 import 'package:diary_mate/features/diary/presentation/bloc/diary_bloc.dart';
+import 'package:diary_mate/features/movie_recomendation/data/implementaions/movie_recomendation_impl.dart';
+import 'package:diary_mate/features/movie_recomendation/data/sources/movie_recomendation_sources.dart';
+import 'package:diary_mate/features/movie_recomendation/domain/repositories/movie_recomendation_repo.dart';
+import 'package:diary_mate/features/movie_recomendation/domain/usecases/get_recomendation.dart';
+import 'package:diary_mate/features/movie_recomendation/presentation/bloc/movie_recomendation_bloc.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:logger/logger.dart';
@@ -46,6 +51,13 @@ void dataSources() async {
   // DiaryDatabase
   final appDatabase = await $FloorAppDatabase.databaseBuilder('diary_mate.db').build();
   sl.registerSingleton<AppDatabase>(appDatabase);
+
+  // MovieRecomendationSources
+  sl.registerLazySingleton<MovieRecomendationSources>(
+    () => MovieRecomendationSources(
+      sl<Logger>(),
+    ),
+  );
 }
 
 void repositories() async {
@@ -54,6 +66,14 @@ void repositories() async {
     () => DiaryRepositoryImpl(
       sl<AppDatabase>(),
       sl<Logger>(),
+    ),
+  );
+
+  // Movie Recommendation Repository
+  sl.registerLazySingleton<MovieRecomendationRepository>(
+    () => MovieRecomendationRepositoryImpl(
+      logger: sl<Logger>(),
+      sources: sl<MovieRecomendationSources>(),
     ),
   );
 }
@@ -79,6 +99,13 @@ void useCases() async {
       sl<DiaryRepository>(),
     ),
   );
+
+  // Get Movie Recommendation Usecase
+  sl.registerLazySingleton<GetRecomendationUsecase>(
+    () => GetRecomendationUsecase(
+      sl<MovieRecomendationRepository>(),
+    ),
+  );
 }
 
 void blocs() async {
@@ -89,6 +116,13 @@ void blocs() async {
       saveDiaryEntry: sl<SaveDiaryEntry>(),
       getAllEntriesUsecase: sl<GetAllEntriesUsecase>(),
       removeDiaryEntry: sl<RemoveDiaryEntry>(),
+    ),
+  );
+  // MovieRecomendationBloc
+  sl.registerLazySingleton<MovieRecomendationBloc>(
+    () => MovieRecomendationBloc(
+      logger: sl<Logger>(),
+      getMovieRecomendationsUsecase: sl<GetRecomendationUsecase>(),
     ),
   );
 }

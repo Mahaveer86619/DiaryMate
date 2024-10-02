@@ -11,6 +11,7 @@ class MyFormTextField extends StatefulWidget {
   final bool obscureText;
   final String? Function(String?) validator;
   final String? initialText;
+  final bool? disableInput;
 
   const MyFormTextField({
     super.key,
@@ -22,6 +23,7 @@ class MyFormTextField extends StatefulWidget {
     this.obscureText = false,
     required this.validator,
     this.initialText,
+    this.disableInput = false,
   });
 
   @override
@@ -39,6 +41,7 @@ class _MyFormTextFieldState extends State<MyFormTextField> {
       obscureText: widget.obscureText ? _visibility : false,
       keyboardType: widget.keyboardType,
       textInputAction: widget.keyboardAction,
+      enabled: !widget.disableInput!,
       autocorrect: false,
       onChanged: (value) {
         widget.controller.text = value;
@@ -87,6 +90,7 @@ class MyBigTextField extends StatelessWidget {
   final String? Function(String?) validator;
   final int? lines;
   final String? initialValue;
+  final bool? disableInput;
 
   const MyBigTextField({
     super.key,
@@ -95,6 +99,7 @@ class MyBigTextField extends StatelessWidget {
     required this.validator,
     this.lines,
     this.initialValue,
+    this.disableInput = false,
   });
 
   @override
@@ -104,8 +109,9 @@ class MyBigTextField extends StatelessWidget {
       validator: validator,
       keyboardType: TextInputType.multiline,
       textInputAction: TextInputAction.newline,
-      maxLines: lines,
+      maxLines: null,
       minLines: lines,
+      enabled: !disableInput!,
       autocorrect: true,
       onChanged: (value) {
         controller.text = value;
@@ -137,6 +143,7 @@ class MyPhoneField extends StatefulWidget {
   final TextInputType keyboardType;
   final TextInputAction keyboardAction;
   final String label;
+  final bool? disableInput;
 
   const MyPhoneField({
     super.key,
@@ -145,6 +152,7 @@ class MyPhoneField extends StatefulWidget {
     required this.keyboardType,
     required this.label,
     required this.keyboardAction,
+    this.disableInput = false,
   });
 
   @override
@@ -173,6 +181,7 @@ class _MyPhoneFieldState extends State<MyPhoneField> {
       keyboardType: widget.keyboardType,
       textInputAction: widget.keyboardAction,
       maxLines: 1,
+      enabled: !widget.disableInput!,
       autocorrect: false,
       onChanged: (value) {
         widget.controller.text = "${selectedCountry.phoneCode}$value";

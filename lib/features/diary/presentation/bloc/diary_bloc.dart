@@ -34,7 +34,8 @@ class DiaryBloc extends Bloc<DiaryEvent, DiaryState> {
     try {
       emit(const DiaryLoading());
       await saveDiaryEntry.execute(params: event.diaryEntry!);
-      emit(const DiaryLoaded([]));
+      final diaryEntries = await getAllEntriesUsecase.execute();
+      emit(DiaryLoaded(diaryEntries));
     } catch (e) {
       logger.e(e);
       emit(const DiaryError('Something Went Wrong!'));
